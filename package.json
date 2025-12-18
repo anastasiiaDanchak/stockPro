@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.67.2",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "amqplib": "^0.10.9",
+    "axios": "^1.13.2",
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1"
+  }
+}

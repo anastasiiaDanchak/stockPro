@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>StockPro</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background: #263238;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 20px 0;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .menu-btn {
+            padding: 12px;
+            margin: 8px 0;
+            background: #37474f;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #455a64;
+        }
+
+        /* MAIN PANEL */
+        .main {
+            flex: 1;
+            background: #fff;
+            margin: 20px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .input {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            background: #4a90e2;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background: #357ac9;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-left: 4px solid #4a90e2;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            min-height: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>📦 StockPro</h2>
+
+    <button class="menu-btn" onclick="loadAddProduct()">➕ Додати товар</button>
+    <button class="menu-btn" onclick="loadInventory()">📦 Переглянути склад</button>
+    <button class="menu-btn" onclick="loadAnalytics()">📊 Аналітика</button>
+    <button class="menu-btn" onclick="loadExpirationPanel()">⏳ Перевірити термін</button>
+</div>
+
+<div class="main" id="main">
+    <h1>Ласкаво просимо до StockPro</h1>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

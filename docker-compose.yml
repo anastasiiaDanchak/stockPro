@@ -1,0 +1,104 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    environment:
+      - RABBIT_URL=amqp://user:password@rabbitmq:5672
+      - INVENTORY_URL=http://inventory-service:3001/inventory
+      - MONGO_URL=mongodb://product-mongo:27017/products
+    depends_on:
+      - rabbitmq
+      - product-mongo
+    ports:
+      - "3000:3000"
+
+  product-mongo:
+    image: mongo
+    container_name: product-mongo
+    restart: always
+    ports:
+      - "27020:27017" 
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    environment:
+      - MONGO_URL=mongodb://inventory-mongo:27017/inventorydb
+    depends_on:
+      - rabbitmq
+      - inventory-mongo
+    ports:
+      - "3001:3001"
+
+  inventory-mongo:
+    image: mongo
+    container_name: inventory-mongo
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - inventory_data:/data/db
+
+  expiration-service:
+    build: ./expiration-service
+    container_name: expiration-service
+    environment:
+      - MONGO_URL=mongodb://expiration-mongo:27017/expirationdb
+    depends_on:
+      - inventory-service
+      - rabbitmq
+      - expiration-mongo
+    ports:
+      - "3003:3003"
+
+  expiration-mongo:
+    image: mongo:6
+    container_name: expiration-mongo
+    restart: always
+    ports:
+      - "27023:27017"
+    volumes:
+      - expiration_data:/data/db
+
+  analytics-service:
+    build: ./analytics-service
+    container_name: analytics-service
+    environment:
+      - MONGO_URL=mongodb://analytics-mongo:27017/analyticsdb
+    depends_on:
+      - rabbitmq
+      - analytics-mongo
+    ports:
+      - "3002:3002"
+
+  analytics-mongo:
+    image: mongo:6
+    container_name: analytics-mongo
+    restart: always
+    ports:
+      - "27022:27017"
+    volumes:
+      - analytics_data:/data/db
+
+volumes:
+  inventory_data:
+  expiration_data:
+  analytics_data:
