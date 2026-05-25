@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   rabbitmq:
@@ -17,88 +16,152 @@ services:
       - "16686:16686"
       - "6831:6831/udp"
 
-  product-service:
-    build: ./product-service
-    container_name: product-service
+  # ── PostgreSQL (єдиний інстанс, 6 БД — по одній на сервіс) ──────────────
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
     environment:
-      - RABBIT_URL=amqp://user:password@rabbitmq:5672
-      - INVENTORY_URL=http://inventory-service:3001/inventory
-      - MONGO_URL=mongodb://product-mongo:27017/products
-    depends_on:
-      - rabbitmq
-      - product-mongo
+      POSTGRES_USER: stockpro
+      POSTGRES_PASSWORD: stockpro
+      POSTGRES_DB: stockpro
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockpro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── API Gateway ─────────────────────────────────────────
+  api-gateway:
+    build: backend/api-gateway
+    container_name: api-gateway
     ports:
       - "3000:3000"
+    environment:
+      - AUTH_URL=http://auth-service:4001
+      - INVENTORY_URL=http://inventory-service:3001
+      - PRODUCT_URL=http://product-service:4003
+      - ANALYTICS_URL=http://analytics-service:3002
+      - EXPIRATION_URL=http://expiration-service:3003
+      - SUPPLY_URL=http://supply-service:3004
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - auth-service
+      - inventory-service
+      - product-service
+      - analytics-service
+      - expiration-service
+      - supply-service
 
-  product-mongo:
-    image: mongo
-    container_name: product-mongo
-    restart: always
+  # ── Auth Service ─────────────────────────────────────────
+  auth-service:
+    build: backend/auth-service
+    container_name: auth-service
     ports:
-      - "27020:27017" 
+      - "4001:4001"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgres://stockpro:stockpro@postgres:5432/authdb
+    depends_on:
+      postgres:
+        condition: service_healthy
 
+  # ── Product Service ─────────────────────────────────────
+  product-service:
+    build: backend/product-service
+    container_name: product-service
+    environment:
+      - PORT=4003
+      - RABBIT_URL=amqp://user:password@rabbitmq:5672
+      - DATABASE_URL=postgres://stockpro:stockpro@postgres:5432/productsdb
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4003:4003"
+
+  # ── Inventory Service ────────────────────────────────────
   inventory-service:
-    build: ./inventory-service
+    build: backend/inventory-service
     container_name: inventory-service
     environment:
-      - MONGO_URL=mongodb://inventory-mongo:27017/inventorydb
+      - PORT=3001
+      - RABBIT_URL=amqp://user:password@rabbitmq:5672
+      - DATABASE_URL=postgres://stockpro:stockpro@postgres:5432/inventorydb
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - rabbitmq
-      - inventory-mongo
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "3001:3001"
 
-  inventory-mongo:
-    image: mongo
-    container_name: inventory-mongo
-    restart: always
-    ports:
-      - "27018:27017"
-    volumes:
-      - inventory_data:/data/db
-
+  # ── Expiration Service ───────────────────────────────────
   expiration-service:
-    build: ./expiration-service
+    build: backend/expiration-service
     container_name: expiration-service
     environment:
-      - MONGO_URL=mongodb://expiration-mongo:27017/expirationdb
+      - PORT=3003
+      - DATABASE_URL=postgres://stockpro:stockpro@postgres:5432/expirationdb
+      - RABBIT_URL=amqp://user:password@rabbitmq:5672
+      - INVENTORY_URL=http://inventory-service:3001/inventory
+      - JWT_SECRET=${JWT_SECRET}
+      - SCAN_INTERVAL_MINUTES=60
     depends_on:
-      - inventory-service
-      - rabbitmq
-      - expiration-mongo
+      inventory-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "3003:3003"
 
-  expiration-mongo:
-    image: mongo:6
-    container_name: expiration-mongo
-    restart: always
-    ports:
-      - "27023:27017"
-    volumes:
-      - expiration_data:/data/db
-
+  # ── Analytics Service ────────────────────────────────────
   analytics-service:
-    build: ./analytics-service
+    build: backend/analytics-service
     container_name: analytics-service
     environment:
-      - MONGO_URL=mongodb://analytics-mongo:27017/analyticsdb
+      - PORT=3002
+      - DATABASE_URL=postgres://stockpro:stockpro@postgres:5432/analyticsdb
+      - RABBIT_URL=amqp://user:password@rabbitmq:5672
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - rabbitmq
-      - analytics-mongo
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "3002:3002"
 
-  analytics-mongo:
-    image: mongo:6
-    container_name: analytics-mongo
-    restart: always
+  # ── Supply Service ───────────────────────────────────────
+  supply-service:
+    build: backend/supply-service
+    container_name: supply-service
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgres://stockpro:stockpro@postgres:5432/supplydb
+      - RABBIT_URL=amqp://user:password@rabbitmq:5672
+      - PRODUCT_URL=http://product-service:4003
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      product-service:
+        condition: service_started
     ports:
-      - "27022:27017"
-    volumes:
-      - analytics_data:/data/db
+      - "3004:3004"
 
 volumes:
-  inventory_data:
-  expiration_data:
-  analytics_data:
+  postgres_data:

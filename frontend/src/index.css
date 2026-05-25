@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ─── Лавандова палітра StockPro ───
+     Sidebar: глибокий фіолетовий
+     Primary CTA: насичений лавандовий
+     Фон: ледь-ледь рожево-лавандовий, нейтральний */
+  --navy:         #3D2A6E;          /* sidebar bg */
+  --navy-light:   #4D3680;
+  --navy-hover:   #5C448C;
+  --blue:         #7C3AED;          /* primary (CTA, посилання, акценти) */
+  --blue-hover:   #6D28D9;
+  --blue-light:   #EDE9FE;          /* лавандове тло для info-бейджів */
+  --green:        #10B981;          /* success — м'якший teal-зелений */
+  --green-light:  #D1FAE5;
+  --green-text:   #047857;
+  --warning:      #D97706;          /* лишаємо помаранчевий для warning */
+  --warning-light:#FEF3C7;
+  --warning-text: #B45309;
+  --orange:       #EA580C;
+  --orange-light: #FFF7ED;
+  --orange-text:  #C2410C;
+  --danger:       #E11D48;          /* малиновий — добре поєднується з фіолетом */
+  --danger-light: #FFE4E6;
+  --danger-text:  #BE123C;
+  --gray-50:      #FAF8FC;          /* з лавандовим відтінком */
+  --gray-100:     #F5F3FA;
+  --gray-200:     #E8E3F2;
+  --gray-300:     #CFC6E0;
+  --gray-400:     #9B8FB5;
+  --gray-500:     #6B6285;
+  --gray-700:     #3F3858;
+  --gray-900:     #1F1A33;
+  --purple:       #A78BFA;          /* "лавандовий-2" для другорядних акцентів */
+  --purple-light: #F4F0FA;
+  --purple-text:  #6D28D9;
+  --radius-sm:    6px;
+  --radius-md:    10px;
+  --radius-lg:    14px;
+  --shadow-sm:    0 1px 3px rgba(60,40,110,.08), 0 1px 2px rgba(60,40,110,.06);
+  --shadow-md:    0 4px 12px rgba(60,40,110,.12);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: var(--gray-900);
+  background: var(--gray-100);
+  -webkit-font-smoothing: antialiased;
+}
