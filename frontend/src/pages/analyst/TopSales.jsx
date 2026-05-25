@@ -157,4 +157,118 @@ export default function TopSales() {
                 <div className="page-loading">Завантаження...</div>
             ) : (
                 <>
-                    <div className="stats-grid stats-grid--
+                    <div className="stats-grid stats-grid--4" style={{ marginBottom: 20 }}>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--blue" />
+                            <div className="stat-card-value">{totalSold.toLocaleString('uk-UA')}</div>
+                            <div className="stat-card-label">Продано одиниць</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--green" />
+                            <div className="stat-card-value">{totalOps}</div>
+                            <div className="stat-card-label">Операцій продажу</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--warning" />
+                            <div className="stat-card-value">{top.length}</div>
+                            <div className="stat-card-label">Позицій у рейтингу</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--blue" />
+                            <div className="stat-card-value" style={{ fontSize: 18, lineHeight: 1.3 }}>
+                                {leader ? leader.name : '—'}
+                            </div>
+                            <div className="stat-card-label">
+                                🥇 Лідер {leader ? `· ${leader.totalQuantity} од.` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    {top.length === 0 ? (
+                        <div className="section-card">
+                            <div className="empty-state" style={{ padding: '48px 24px' }}>
+                                Продажів у цьому періоді ще немає.<br />
+                                <span style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6, display: 'block' }}>
+                                    Спробуйте розширити діапазон дат.
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="section-card" style={{ marginBottom: 16 }}>
+                                <div className="section-card-header">
+                                    <h2 className="section-card-title">Рейтинг товарів</h2>
+                                    <span className="section-card-count">{top.length} позицій</span>
+                                </div>
+                                <PodiumChart rows={top} />
+                            </div>
+
+                            <div className="section-card">
+                                <div className="section-card-header">
+                                    <h2 className="section-card-title">Деталізація</h2>
+                                    <span className="section-card-count">{top.length}</span>
+                                </div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th style={{ width: 50 }}>#</th>
+                                            <th>Товар</th>
+                                            <th style={{ width: 130 }}>Продано (од.)</th>
+                                            <th style={{ width: 100 }}>Операцій</th>
+                                            <th style={{ width: 100 }}>Частка</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {top.map((r, i) => {
+                                            const pct   = totalSold > 0
+                                                ? ((r.totalQuantity / totalSold) * 100).toFixed(1)
+                                                : '0.0';
+                                            const medal = i < 3 ? ['🥇','🥈','🥉'][i] : null;
+                                            return (
+                                                <tr key={r.name || i}>
+                                                    <td style={{ fontWeight: 600, color: i < 3 ? RANK_COLORS[i] : 'var(--gray-400)' }}>
+                                                        {medal && <span style={{ marginRight: 4 }}>{medal}</span>}{i + 1}
+                                                    </td>
+                                                    <td className="td-name">{r.name || '—'}</td>
+                                                    <td><strong>{r.totalQuantity.toLocaleString('uk-UA')}</strong></td>
+                                                    <td style={{ color: 'var(--gray-500)' }}>{r.events}</td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <div style={{
+                                                                flex: 1, height: 6,
+                                                                background: 'var(--gray-100)',
+                                                                borderRadius: 4, overflow: 'hidden'
+                                                            }}>
+                                                                <div style={{
+                                                                    width: `${pct}%`, height: '100%',
+                                                                    background: 'var(--blue)', borderRadius: 4
+                                                                }} />
+                                                            </div>
+                                                            <span style={{ fontSize: 12, color: 'var(--gray-500)', minWidth: 36 }}>
+                                                                {pct}%
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style={{ background: 'var(--gray-50)', fontWeight: 600 }}>
+                                            <td colSpan={2} style={{ padding: '10px 20px', fontSize: 13, color: 'var(--gray-700)' }}>
+                                                Разом
+                                            </td>
+                                            <td style={{ padding: '10px 20px', fontSize: 13 }}>{totalSold.toLocaleString('uk-UA')}</td>
+                                            <td style={{ padding: '10px 20px', fontSize: 13 }}>{totalOps}</td>
+                                            <td style={{ padding: '10px 20px', fontSize: 13 }}>100%</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}

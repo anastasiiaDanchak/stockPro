@@ -195,4 +195,81 @@ export default function SupplierAnalysis() {
                                         rows={summary.map(r => ({
                                             name: r.supplier,
                                             value: r.revenue,
-        
+                                            display: money(r.revenue)
+                                        }))}
+                                        max={maxRevenue}
+                                        color="#10b981"
+                                    />
+                                </div>
+                                <div className="section-card">
+                                    <div className="section-card-header">
+                                        <h2 className="section-card-title">Списано (одиниць)</h2>
+                                    </div>
+                                    <HorizontalBars
+                                        rows={summary.map(r => ({ name: r.supplier, value: r.writeoffQty }))}
+                                        max={maxWriteoff}
+                                        color="#ef4444"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Зведена таблиця */}
+                            <div className="section-card">
+                                <div className="section-card-header">
+                                    <h2 className="section-card-title">Зведення по постачальниках</h2>
+                                    <span className="section-card-count">{summary.length}</span>
+                                </div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Постачальник</th>
+                                            <th style={{ width: 90 }}>Прийнято</th>
+                                            <th style={{ width: 130 }}>Продано</th>
+                                            <th style={{ width: 140 }}>Виручка</th>
+                                            <th style={{ width: 130 }}>Списано</th>
+                                            <th style={{ width: 120 }}>Прострочено</th>
+                                            <th style={{ width: 90 }}>% втрат</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {summary.map(r => {
+                                            const totalMoved = r.soldQty + r.writeoffQty;
+                                            const lossPct = totalMoved > 0
+                                                ? Math.round((r.writeoffQty / totalMoved) * 100)
+                                                : 0;
+                                            return (
+                                                <tr key={r.supplier}>
+                                                    <td className="td-name">{r.supplier}</td>
+                                                    <td>{r.received}</td>
+                                                    <td>
+                                                        {r.soldQty.toFixed(Number.isInteger(r.soldQty) ? 0 : 2)}
+                                                        <span className="td-muted"> ({r.salesCount} оп.)</span>
+                                                    </td>
+                                                    <td><strong>{money(r.revenue)}</strong> грн</td>
+                                                    <td>
+                                                        {r.writeoffQty.toFixed(Number.isInteger(r.writeoffQty) ? 0 : 2)}
+                                                        <span className="td-muted"> ({r.writeoffCount} оп.)</span>
+                                                    </td>
+                                                    <td>
+                                                        {r.expiredQty > 0
+                                                            ? <span className="badge badge--danger">{r.expiredQty} од.</span>
+                                                            : <span style={{ color: 'var(--gray-400)' }}>—</span>}
+                                                    </td>
+                                                    <td>
+                                                        <span className={`badge ${lossPct >= 20 ? 'badge--danger' : lossPct >= 10 ? 'badge--warning' : 'badge--green'}`}>
+                                                            {lossPct}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}

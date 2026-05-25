@@ -112,7 +112,7 @@ export default function WriteoffReport() {
                 <div>
                     <h1 className="page-title">Звіт про списання</h1>
                     <p className="page-subtitle">
-                        {fmtDate(filter.from)} — {fmtDate(filter.to)} · розбивка за причинами
+                        {fmtDate(filter.from)} — {fmtDate(filter.to)}
                     </p>
                 </div>
                 <button
@@ -134,4 +134,129 @@ export default function WriteoffReport() {
                 <span style={{ color: 'var(--gray-400)', fontSize: 13 }}>—</span>
                 <input className="filter-search" type="date" value={filter.to}
                        title="Кінець"
-                       onChange=
+                       onChange={e => setFilter(f => ({ ...f, to: e.target.value }))} />
+                <button className="btn btn--primary btn--sm" onClick={() => load()}>
+                    Оновити
+                </button>
+            </div>
+
+            {loading ? (
+                <div className="page-loading">Завантаження звіту...</div>
+            ) : (
+                <>
+                    <div className="stats-grid stats-grid--4" style={{ marginBottom: 20 }}>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--gray" />
+                            <div className="stat-card-value">{total.toLocaleString('uk-UA')}</div>
+                            <div className="stat-card-label">Усього списано (од.)</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--warning" />
+                            <div className="stat-card-value">{totalOps}</div>
+                            <div className="stat-card-label">Операцій списання</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--danger" />
+                            <div className="stat-card-value">{expiredRow ? expiredRow.totalQuantity : 0}</div>
+                            <div className="stat-card-label">⏰ Прострочено (од.)</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-card-bar stat-card-bar--blue" />
+                            <div className="stat-card-value" style={{ fontSize: 18, lineHeight: 1.3 }}>
+                                {topRow ? topRow.label : '—'}
+                            </div>
+                            <div className="stat-card-label">
+                                Головна причина {topRow ? `· ${topRow.totalQuantity} од.` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    {rows.length === 0 ? (
+                        <div className="section-card">
+                            <div className="empty-state" style={{ padding: '48px 24px' }}>
+                                За обраний період списань не знайдено.<br />
+                                <span style={{ fontSize: 12, color: 'var(--gray-400)', marginTop: 6, display: 'block' }}>
+                                    Спробуйте розширити діапазон дат.
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="section-card" style={{ marginBottom: 16 }}>
+                                <div className="section-card-header">
+                                    <h2 className="section-card-title">Списання за причинами</h2>
+                                    <span className="section-card-count">{rows.length} причин</span>
+                                </div>
+                                <WriteoffChart rows={rows} />
+                            </div>
+
+                            <div className="section-card">
+                                <div className="section-card-header">
+                                    <h2 className="section-card-title">Деталізація</h2>
+                                    <span className="section-card-count">{rows.length}</span>
+                                </div>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th style={{ width: 40 }}>#</th>
+                                            <th>Причина</th>
+                                            <th style={{ width: 140 }}>Списано (од.)</th>
+                                            <th style={{ width: 100 }}>Операцій</th>
+                                            <th style={{ width: 100 }}>Частка</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rows.map((r, i) => {
+                                            const meta  = REASON_META[r.reason] || { color: '#94a3b8', icon: '📋' };
+                                            const share = total > 0
+                                                ? ((r.totalQuantity / total) * 100).toFixed(1)
+                                                : '0.0';
+                                            return (
+                                                <tr key={r.reason || i}>
+                                                    <td style={{ color: 'var(--gray-400)', fontWeight: 500 }}>{i + 1}</td>
+                                                    <td>
+                                                        <span style={{ marginRight: 6 }}>{meta.icon}</span>
+                                                        <strong>{r.label || r.reason || '—'}</strong>
+                                                    </td>
+                                                    <td><strong>{r.totalQuantity.toLocaleString('uk-UA')}</strong></td>
+                                                    <td style={{ color: 'var(--gray-500)' }}>{r.events}</td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <div style={{
+                                                                flex: 1, height: 6,
+                                                                background: 'var(--gray-100)',
+                                                                borderRadius: 4, overflow: 'hidden'
+                                                            }}>
+                                                                <div style={{
+                                                                    width: `${share}%`, height: '100%',
+                                                                    background: meta.color, borderRadius: 4
+                                                                }} />
+                                                            </div>
+                                                            <span style={{ fontSize: 12, color: 'var(--gray-500)', minWidth: 36 }}>
+                                                                {share}%
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style={{ background: 'var(--gray-50)', fontWeight: 600 }}>
+                                            <td colSpan={2} style={{ padding: '10px 20px', fontSize: 13, color: 'var(--gray-700)' }}>
+                                                Разом
+                                            </td>
+                                            <td style={{ padding: '10px 20px', fontSize: 13 }}>{total.toLocaleString('uk-UA')}</td>
+                                            <td style={{ padding: '10px 20px', fontSize: 13 }}>{totalOps}</td>
+                                            <td style={{ padding: '10px 20px', fontSize: 13 }}>100%</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}

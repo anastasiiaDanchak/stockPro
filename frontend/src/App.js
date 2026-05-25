@@ -25,7 +25,6 @@ import AnalystDashboard  from './pages/analyst/AnalystDashboard';
 import SalesReport       from './pages/analyst/SalesReport';
 import WriteoffReport    from './pages/analyst/WriteoffReport';
 import TopSales          from './pages/analyst/TopSales';
-import SupplierAnalysis  from './pages/analyst/SupplierAnalysis';
 
 // ── Спільне ────────────────────────────────────────────
 import OperationsHistory from './pages/OperationsHistory';
@@ -87,7 +86,6 @@ export default function App() {
                                             <Route path="/analyst/sales-report"    element={<ProtectedRoute roles={['analyst']}><SalesReport /></ProtectedRoute>} />
                                             <Route path="/analyst/writeoff-report" element={<ProtectedRoute roles={['analyst']}><WriteoffReport /></ProtectedRoute>} />
                                             <Route path="/analyst/top-sales"       element={<ProtectedRoute roles={['analyst']}><TopSales /></ProtectedRoute>} />
-                                            <Route path="/analyst/suppliers"       element={<ProtectedRoute roles={['analyst']}><SupplierAnalysis /></ProtectedRoute>} />
 
                                             {/* Fallback — редірект на домашню сторінку ролі */}
                                             <Route path="*" element={<RoleHome />} />

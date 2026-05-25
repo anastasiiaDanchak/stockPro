@@ -39,8 +39,7 @@ const NAV_SECTIONS = [
             { to: '/analyst/dashboard',       label: 'Огляд',          icon: '◉', roles: ['analyst'] },
             { to: '/analyst/sales-report',    label: 'Звіт продажів',  icon: '↗', roles: ['analyst'] },
             { to: '/analyst/writeoff-report', label: 'Звіт списань',   icon: '↘', roles: ['analyst'] },
-            { to: '/analyst/top-sales',       label: 'Топ продажів',   icon: '★', roles: ['analyst'] },
-            { to: '/analyst/suppliers',       label: 'Постачальники',  icon: '⛟', roles: ['analyst'] }
+            { to: '/analyst/top-sales',       label: 'Топ продажів',   icon: '★', roles: ['analyst'] }
         ]
     }
 ];
